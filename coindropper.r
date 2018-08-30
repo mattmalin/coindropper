@@ -1,12 +1,14 @@
 library(tidyverse)
 # there are 8 start buckets, and 9 end buckets
-
 # | | | | | | | | |
 # so each start_bucket is 9/8 the size of an end bucket
 
-# recorded data has single line with start_bucket and end_bucket observations:
+
+# Data loading ------------------------------------------------------------
+# recorded data has single line for each start_bucket and end_bucket observations:
 experience_individuals <- read_csv("experience.txt", col_names = c("start_bucket", "end_bucket"))
 
+# add 'mirrored' observations under assumption of symmetry:
 experience_individuals <- bind_rows(
   experience_individuals, 
   mutate(experience_individuals,
@@ -22,6 +24,8 @@ experience_rescaled <- experience %>%
   mutate(proportion = count / sum(count)) %>% 
   ungroup()
 
+
+# Visualisations ----------------------------------------------------------
 
 ggplot(experience, aes(x = end_bucket, y = count)) + 
   geom_bar(stat = "identity", aes(fill = factor(end_bucket))) +
@@ -43,3 +47,57 @@ ggplot(experience_rescaled, aes(x = start_bucket, y = proportion)) +
   ) +
   scale_x_continuous(breaks = 1:9) +
   facet_wrap(~ end_bucket, scales = "free_y")
+
+
+
+# Distribution fitting ----------------------------------------------------
+
+experience %>% 
+  group_by(start_bucket) %>% 
+  summarise(sum = sum(count)) %>% 
+  arrange(desc(sum))
+
+experience %>% 
+  filter(start_bucket == 4)
+
+library(fitdistrplus)
+
+sample_points <- rbinom(100, 10, 0.5)
+
+fitdist(
+  data = sample_points,
+  distr = "binom",
+  fix.arg = list(size = 10),
+  start = list(prob = 0.4)
+  )
+
+
+
+fitdist(
+  data = sample_points,
+  distr = "binom",
+  fix.arg = list(size = 10),
+  start = list(prob = 0.4)
+)
+
+
+experience %>% 
+  ungroup() %>% 
+  filter(start_bucket == 4) %>% 
+  (function(x) {rep(x$end_bucket, x$count)}) %>% 
+  fitdist("binom", fix.arg = list(size = 9), start = list(prob = 0.4))
+
+example_bucket_4 <- experience %>% 
+  ungroup() %>% 
+  filter(start_bucket == 4) %>% 
+  (function(x) {rep(x$end_bucket, x$count)}) %>% 
+  fitdist("binom", fix.arg = list(size = 9), start = list(prob = 0.4))
+
+str(example_bucket_4)
+
+
+
+
+library(broom)
+
+

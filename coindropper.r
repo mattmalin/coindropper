@@ -5,7 +5,6 @@ library(fitdistrplus)
 # | | | | | | | | |
 # so each start_bucket is 9/8 the size of an end bucket
 
-
 # Data loading ------------------------------------------------------------
 # recorded data has single line for each start_bucket and end_bucket observations:
 experience_individuals <- read_csv("experience.txt", col_names = c("start_bucket", "end_bucket"))
@@ -15,12 +14,11 @@ experience_individuals <- read_csv("experience.txt", col_names = c("start_bucket
 experience <- experience_individuals %>% 
   mutate(
     start_bucket = 9 - start_bucket,
-    end_bucket   =  10 - end_bucket) %>%
+    end_bucket   = 10 - end_bucket) %>%
   bind_rows(experience_individuals) %>% 
   mutate(end_bucket = end_bucket - 1) %>% 
   group_by(start_bucket, end_bucket) %>% 
   summarise(count = length(end_bucket)) %>%
-  group_by(start_bucket) %>% 
   mutate(proportion = count / sum(count)) %>% 
   ungroup()
 
@@ -47,9 +45,7 @@ experience_fitted <- distribution_fitting %>%
   unnest(.preserve = fitted_distribution) %>% 
   mutate(
     estimate_proportion = dbinom(end_bucket, 8, estimate)
-  ) %>% 
-  group_by(start_bucket)
-
+  ) 
 
 # Visualisations ----------------------------------------------------------
 
@@ -62,17 +58,6 @@ ggplot(experience, aes(x = end_bucket, y = proportion)) +
   ) +
   scale_x_continuous(breaks = 1:9) +
   facet_wrap(~ start_bucket)
-
-
-ggplot(experience_rescaled, aes(x = start_bucket, y = proportion)) + 
-  geom_bar(stat = "identity", aes(fill = factor(start_bucket))) +
-  labs(
-    title = "End bucket distribution by starting bucket",
-    fill = "End bucket",
-    x = "End Bucket"
-  ) +
-  scale_x_continuous(breaks = 1:9) +
-  facet_wrap(~ end_bucket, scales = "free_y")
 
 
 ggplot(distribution_fitting, aes(x = start_bucket, y = estimate)) +
@@ -92,4 +77,16 @@ ggplot(experience_fitted, aes(x = end_bucket, y = proportion)) +
   facet_wrap(~ start_bucket, scales = "free_y")
 
 
+# Potential alternative looking another way: if wanting to land in a target
+# bucket, what is the distribution of starting bucket to get there, assuming
+# starting buckets all equally weighted (i.e. using proportions to rescale counts):
+ggplot(experience, aes(x = start_bucket, y = proportion)) + 
+  geom_bar(stat = "identity", aes(fill = factor(start_bucket))) +
+  labs(
+    title = "End bucket distribution by starting bucket",
+    fill = "End bucket",
+    x = "End Bucket"
+  ) +
+  scale_x_continuous(breaks = 1:9) +
+  facet_wrap(~ end_bucket, scales = "free_y")
 

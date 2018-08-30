@@ -95,6 +95,9 @@ example_bucket_4 <- experience %>%
 
 str(example_bucket_4)
 
+# note that binomial distribution has chance of 0, i.e. with size 10 there can be between 0 and 10
+# successes, but here there is always a bucket, i.e. 1-9 rather than 0-9
+# so may need to use size 8 rather than 9 - TBD
 
 
 

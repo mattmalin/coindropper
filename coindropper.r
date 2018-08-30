@@ -65,16 +65,19 @@ ggplot(distribution_fitting, aes(x = start_bucket, y = estimate)) +
 
 
 ggplot(experience_fitted, aes(x = end_bucket, y = proportion)) + 
-  geom_bar(stat = "identity", aes(fill = factor(end_bucket))) +
+  # geom_bar(stat = "identity", aes(fill = factor(end_bucket))) +
+  geom_bar(stat = "identity", aes(fill = factor(end_bucket), alpha = ave(count, by = start_bucket, FUN = sum))) + # if wanting to weight plot by count
   geom_point(aes(y = estimate_proportion)) +
   geom_line(aes(y = estimate_proportion)) +
   labs(
     title = "End bucket distribution by starting bucket",
     fill = "End bucket",
-    x = "End Bucket"
+    x = "End Bucket",
+    alpha = "Starting bucket observation count"
   ) +
   scale_x_continuous(breaks = 1:9) +
-  facet_wrap(~ start_bucket, scales = "free_y")
+  facet_wrap(~ start_bucket, scales = "free_y") +
+  theme_minimal()
 
 
 # Potential alternative looking another way: if wanting to land in a target

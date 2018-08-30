@@ -13,10 +13,10 @@ experience_individuals <- read_csv("experience.txt", col_names = c("start_bucket
 # and add 'mirrored' observations under assumption of symmetry:
 experience <- experience_individuals %>% 
   mutate(
-    start_bucket = 9 - start_bucket,
-    end_bucket   = 10 - end_bucket) %>%
+    start_bucket = 9 - start_bucket,      # 8 total start buckets, so (8+1-n) to mirror
+    end_bucket   = 10 - end_bucket) %>%   # 9 total end buckets, so (9+1-n) to mirror
   bind_rows(experience_individuals) %>% 
-  mutate(end_bucket = end_bucket - 1) %>% 
+  mutate(end_bucket = end_bucket - 1) %>% # offsetting bucket by 1 to start at 0 
   group_by(start_bucket, end_bucket) %>% 
   summarise(count = length(end_bucket)) %>%
   mutate(proportion = count / sum(count)) %>% 

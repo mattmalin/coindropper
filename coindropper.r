@@ -17,6 +17,11 @@ experience <- experience_individuals %>%
   group_by(start_bucket, end_bucket) %>% 
   summarise(count = length(end_bucket))
 
+experience_rescaled <- experience %>% 
+  group_by(start_bucket) %>% 
+  mutate(proportion = count / sum(count)) %>% 
+  ungroup()
+
 
 ggplot(experience, aes(x = end_bucket, y = count)) + 
   geom_bar(stat = "identity", aes(fill = factor(end_bucket))) +
@@ -27,3 +32,14 @@ ggplot(experience, aes(x = end_bucket, y = count)) +
   ) +
   scale_x_continuous(breaks = 1:9) +
   facet_wrap(~ start_bucket, scales = "free_y")
+
+
+ggplot(experience_rescaled, aes(x = start_bucket, y = proportion)) + 
+  geom_bar(stat = "identity", aes(fill = factor(start_bucket))) +
+  labs(
+    title = "End bucket distribution by starting bucket",
+    fill = "End bucket",
+    x = "End Bucket"
+  ) +
+  scale_x_continuous(breaks = 1:9) +
+  facet_wrap(~ end_bucket, scales = "free_y")

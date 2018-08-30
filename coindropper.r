@@ -33,16 +33,16 @@ distribution_fitting <- experience %>%
   nest() %>% 
   group_by(start_bucket) %>%
   mutate(
-    fitted_distribution = map(data, function(x) {
+    fitted_binomial = map(data, function(x) {
       fitdist(rep(x$end_bucket, x$count), "binom", fix.arg = list(size = 8), start = list(prob = start_bucket / 9))
     })
   ) %>% 
   mutate(
-    estimate = map_dbl(fitted_distribution, function(x) x[["estimate"]][["prob"]])
+    estimate = map_dbl(fitted_binomial, function(x) x[["estimate"]][["prob"]])
   )
 
 experience_fitted <- distribution_fitting %>%
-  unnest(.preserve = fitted_distribution) %>% 
+  unnest(.preserve = fitted_binomial) %>% 
   mutate(
     estimate_proportion = dbinom(end_bucket, 8, estimate)
   ) 
